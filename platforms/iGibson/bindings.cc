@@ -32,7 +32,7 @@ namespace igibson {
     py::array_t<float> InitializeFromMeshAndTest(int num_vertices, int num_triangles,
         py::array_t<float> vertices, py::array_t<int> triangles,
         py::array_t<int> material_indices,
-        float scattering_coefficient, py::str file, py::array_t<float> source_location, py::array_t<float> head_pos) {
+        float scattering_coefficient, const char * fName, py::array_t<float> source_location, py::array_t<float> head_pos) {
 
         // Number of frames per buffer.
         const size_t kFramesPerBuffer = 256;
@@ -81,8 +81,6 @@ namespace igibson {
 
         SetRoomProperties(&proxy_room_properties, rt60s);
 
-        const char* fName = file.cast<const char*>();
-
         std::filebuf fb;
 
         if (!fb.open(fName, std::ios::in)) assert(1);
@@ -122,10 +120,12 @@ namespace igibson {
 
         return output_py; //Memory leak?
     }
+
+    PYBIND11_MODULE(audio, m) {
+        //m.def<decltype(&InitializeFromMeshAndTest)>("InitializeFromMeshAndTest", &InitializeFromMeshAndTest);
+        m.def("InitializeFromMeshAndTest", &InitializeFromMeshAndTest);
+    }
 }
 }  // namespace vraudio
 
 
-PYBIND11_MODULE(audio, m) {
-    m.def("InitializeFromMeshAndTest", &vraudio::igibson::InitializeFromMeshAndTest, py::return_value_policy::take_ownership);
-}

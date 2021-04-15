@@ -17,7 +17,7 @@ namespace igibson {
 py::array_t<float> InitializeFromMeshAndTest(int num_vertices, int num_triangles,
     py::array_t<float> vertices, py::array_t<int> triangles,
     py::array_t<int> material_indices,
-    float scattering_coefficient);
+    float scattering_coefficient, const char* fName, py::array_t<float> source_location, py::array_t<float> head_pos);
 }  // namespace vraudio
 }
 #endif  // RESONANCE_AUDIO_PLATFORM_IGIBSON_BINDINGS_H_
