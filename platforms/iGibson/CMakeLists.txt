@@ -13,6 +13,9 @@
 # limitations under the License.
 #
 
+#project(audiopluginresonanceaudio)
+
+
 if (WIN32)
     set(STATIC_LIB_EXT ".lib")
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -48,6 +51,8 @@ else ()
             "${LIBVORBIS_DIR}/lib/libvorbisenc.a"
             "${LIBVORBIS_DIR}/lib/libvorbisfile.a")
 endif ()
+
+add_subdirectory(pybind11)
 
 # Create STATIC IMPORTED library targets for static 3P dependencies.
 
@@ -154,34 +159,38 @@ target_include_directories(OggRecorderObj PRIVATE ${LIBOGG_INCLUDE_DIR})
 
 set(UNITY_PLUGIN_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/nativeaudioplugins" CACHE PATH "Path to Unity Native Audio Plugins SDK")
 
-set(RA_UNITY_SOURCE_DIR "${PROJECT_SOURCE_DIR}/platforms/unity")
+set(RA_GIB_SOURCE_DIR "${PROJECT_SOURCE_DIR}/platforms/iGibson")
 if (IOS_DETECTED OR ANDROID)
-    set(RA_UNITY_SOURCES
+    set(RA_GIB_SOURCES
             $<TARGET_OBJECTS:ResonanceAudioObj>
             $<TARGET_OBJECTS:SadieHrtfsObj>
             $<TARGET_OBJECTS:PffftObj>
-            ${RA_UNITY_SOURCE_DIR}/unity_nativeaudioplugins.h
-            ${RA_UNITY_SOURCE_DIR}/unity_nativeaudioplugins.cc
-            ${RA_UNITY_SOURCE_DIR}/unity.h
-            ${RA_UNITY_SOURCE_DIR}/unity.cc
+            ${RA_GIB_SOURCE_DIR}/bindings.h
+            ${RA_GIB_SOURCE_DIR}/bindings.cc
+            ${RA_GIB_SOURCE_DIR}/igibson_nativeaudioplugins.h
+            ${RA_GIB_SOURCE_DIR}/igibson_nativeaudioplugins.cc
+            ${RA_GIB_SOURCE_DIR}/igibson.h
+            ${RA_GIB_SOURCE_DIR}/igibson.cc
             )
 else ()
-    set(RA_UNITY_SOURCES
+    set(RA_GIB_SOURCES
             $<TARGET_OBJECTS:ResonanceAudioObj>
             $<TARGET_OBJECTS:SadieHrtfsObj>
             $<TARGET_OBJECTS:PffftObj>
             $<TARGET_OBJECTS:GeometricalAcousticsObj>
             $<TARGET_OBJECTS:OggRecorderObj>
-            ${RA_UNITY_SOURCE_DIR}/unity_nativeaudioplugins.h
-            ${RA_UNITY_SOURCE_DIR}/unity_nativeaudioplugins.cc
-            ${RA_UNITY_SOURCE_DIR}/unity_reverb_computer.h
-            ${RA_UNITY_SOURCE_DIR}/unity_reverb_computer.cc
-            ${RA_UNITY_SOURCE_DIR}/unity.h
-            ${RA_UNITY_SOURCE_DIR}/unity.cc
+            ${RA_GIB_SOURCE_DIR}/bindings.h
+            ${RA_GIB_SOURCE_DIR}/bindings.cc
+            ${RA_GIB_SOURCE_DIR}/igibson_nativeaudioplugins.h
+            ${RA_GIB_SOURCE_DIR}/igibson_nativeaudioplugins.cc
+            ${RA_GIB_SOURCE_DIR}/igibson_reverb_computer.h
+            ${RA_GIB_SOURCE_DIR}/igibson_reverb_computer.cc
+            ${RA_GIB_SOURCE_DIR}/igibson.h
+            ${RA_GIB_SOURCE_DIR}/igibson.cc
             )
 endif ()
 
-add_library(audiopluginresonanceaudio SHARED ${RA_UNITY_SOURCES})
+add_library(audiopluginresonanceaudio SHARED ${RA_GIB_SOURCES})
 set(PFFFT_INCLUDE_DIR ${PFFFT_DIR})
 target_include_directories(audiopluginresonanceaudio PRIVATE ${UNITY_PLUGIN_SDK_DIR})
 target_include_directories(audiopluginresonanceaudio PRIVATE ${RA_SOURCE_DIR})
@@ -190,17 +199,17 @@ target_include_directories(audiopluginresonanceaudio PRIVATE ${EIGEN3_INCLUDE_DI
 target_include_directories(audiopluginresonanceaudio PRIVATE ${PFFFT_INCLUDE_DIR}/)
 target_include_directories(audiopluginresonanceaudio PRIVATE ${LIBVORBIS_INCLUDE_DIR})
 target_include_directories(audiopluginresonanceaudio PRIVATE ${LIBOGG_INCLUDE_DIR})
-if (MSVC)
-    target_sources(audiopluginresonanceaudio PUBLIC ${RA_UNITY_SOURCE_DIR}/unity_win.def)
-endif (MSVC)
+#if (MSVC)
+#    target_sources(audiopluginresonanceaudio PUBLIC ${RA_GIB_SOURCE_DIR}/igibson_win.def)
+#endif (MSVC)
 
 TargetLinkExternal3PStaticLibs(audiopluginresonanceaudio)
 if (MSVC)
     # Embree pulls in WinSock32
-    target_link_libraries(audiopluginresonanceaudio wsock32 ws2_32)
+    target_link_libraries(audiopluginresonanceaudio pybind11::module pybind11:pybind11 wsock32 ws2_32)
 endif (MSVC)
 
-set(UNITY_INSTALL_DIR "${INSTALL_DIR}/unity/Assets/ResonanceAudio/Plugins/")
+set(IGIB_INSTALL_DIR "${INSTALL_DIR}/iGibson/")
 set(INSTALL_BIN_DIR "")
 if (MSVC)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -229,11 +238,11 @@ elseif (UNIX)
 endif ()
 
 install(TARGETS audiopluginresonanceaudio
-        LIBRARY DESTINATION "${UNITY_INSTALL_DIR}/${INSTALL_BIN_DIR}/"
-        ARCHIVE DESTINATION "${UNITY_INSTALL_DIR}/${INSTALL_BIN_DIR}/"
-        RUNTIME DESTINATION "${UNITY_INSTALL_DIR}/${INSTALL_BIN_DIR}/")
-install(DIRECTORY ${RA_UNITY_SOURCE_DIR}/UnityIntegration/Assets DESTINATION "${INSTALL_DIR}/unity")
-install(DIRECTORY ${RA_UNITY_SOURCE_DIR}/UnityIntegration/ProjectSettings DESTINATION "${INSTALL_DIR}/unity")
+        LIBRARY DESTINATION "${IGIB_INSTALL_DIR}/${INSTALL_BIN_DIR}/"
+        ARCHIVE DESTINATION "${IGIB_INSTALL_DIR}/${INSTALL_BIN_DIR}/"
+        RUNTIME DESTINATION "${IGIB_INSTALL_DIR}/${INSTALL_BIN_DIR}/")
+#install(DIRECTORY ${RA_UNITY_SOURCE_DIR}/UnityIntegration/Assets DESTINATION "${INSTALL_DIR}/unity")
+#install(DIRECTORY ${RA_UNITY_SOURCE_DIR}/UnityIntegration/ProjectSettings DESTINATION "${INSTALL_DIR}/unity")
 
 if (BUILD_GEOMETRICAL_ACOUSTICS_TESTS)
     set(RA_GEO_ACOUSTICS_TESTS

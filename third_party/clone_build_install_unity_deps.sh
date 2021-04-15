@@ -21,7 +21,7 @@ cd "${SCRIPT_DIR}"
 # Number of CPU cores/parallel compilation instances (for Darwin/Linux builds)
 NUM_CORES=8
 
-MSVC_GENERATOR="Visual Studio 14 2015"
+MSVC_GENERATOR="Visual Studio 16 2019"
 
 declare -a EMBREE_CONFIG
 EMBREE_CONFIG+=(-DEMBREE_ISPC_SUPPORT=OFF)
@@ -111,12 +111,12 @@ case "$(uname -s)" in
     EMBREE_CONFIG+=(-DEMBREE_STATIC_RUNTIME=ON)
 
     # Create 64bit builds
-    WIN64_GENERATOR_FLAG="${MSVC_GENERATOR} Win64"
+    WIN64_GENERATOR_FLAG="${MSVC_GENERATOR}"
     compile_embree_ogg_vorbis "${WIN64_GENERATOR_FLAG}" "build64" "install64"
 
     # Create 32bit builds
-    WIN32_GENERATOR_FLAG="${MSVC_GENERATOR}"
-    compile_embree_ogg_vorbis "${WIN32_GENERATOR_FLAG}" "build32" "install32"
+    #WIN32_GENERATOR_FLAG="${MSVC_GENERATOR} -A Win32"
+    #compile_embree_ogg_vorbis "${WIN32_GENERATOR_FLAG}" "build32" "install32"
     ;;
 
   *)
