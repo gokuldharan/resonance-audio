@@ -31,6 +31,9 @@ else ()
     set(EMBREE_BUILD_DIR "build")
 endif ()
 
+find_package(PythonInterp 3.6 REQUIRED)
+find_package(PythonLibs 3.6 REQUIRED)
+
 set(LIBOGG_DIR "${PROJECT_SOURCE_DIR}/third_party/ogg/${THIRD_PARTY_INSTALL_DIR}" CACHE PATH "Path to libOgg installation")
 set(LIBOGG_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/third_party/ogg/include")
 set(LIBVORBIS_DIR "${PROJECT_SOURCE_DIR}/third_party/vorbis/${THIRD_PARTY_INSTALL_DIR}" CACHE PATH "Path to libVorbis installation")
@@ -188,26 +191,33 @@ else ()
             )
 endif ()
 
-add_library(audiopluginresonanceaudio SHARED ${RA_GIB_SOURCES})
+#add_library(audiopluginresonanceaudio SHARED ${RA_GIB_SOURCES})
+add_library(audio MODULE ${RA_GIB_SOURCES})
+
 set(PFFFT_INCLUDE_DIR ${PFFFT_DIR})
-target_include_directories(audiopluginresonanceaudio PRIVATE ${UNITY_PLUGIN_SDK_DIR})
-target_include_directories(audiopluginresonanceaudio PRIVATE ${RA_SOURCE_DIR})
-target_include_directories(audiopluginresonanceaudio PRIVATE ${LIBEMBREE_INCLUDE_DIR})
-target_include_directories(audiopluginresonanceaudio PRIVATE ${EIGEN3_INCLUDE_DIR}/)
-target_include_directories(audiopluginresonanceaudio PRIVATE ${PFFFT_INCLUDE_DIR}/)
-target_include_directories(audiopluginresonanceaudio PRIVATE ${LIBVORBIS_INCLUDE_DIR})
-target_include_directories(audiopluginresonanceaudio PRIVATE ${LIBOGG_INCLUDE_DIR})
+target_include_directories(audio PRIVATE ${UNITY_PLUGIN_SDK_DIR})
+target_include_directories(audio PRIVATE ${RA_SOURCE_DIR})
+target_include_directories(audio PRIVATE ${LIBEMBREE_INCLUDE_DIR})
+target_include_directories(audio PRIVATE ${EIGEN3_INCLUDE_DIR}/)
+target_include_directories(audio PRIVATE ${PFFFT_INCLUDE_DIR}/)
+target_include_directories(audio PRIVATE ${LIBVORBIS_INCLUDE_DIR})
+target_include_directories(audio PRIVATE ${LIBOGG_INCLUDE_DIR})
 #if (MSVC)
 #    target_sources(audiopluginresonanceaudio PUBLIC ${RA_GIB_SOURCE_DIR}/igibson_win.def)
 #endif (MSVC)
 
-TargetLinkExternal3PStaticLibs(audiopluginresonanceaudio)
+#add_library(audiobindings MODULE  ${RA_GIB_SOURCE_DIR}/bindings.h ${RA_GIB_SOURCE_DIR}/bindings.cc)
+
+TargetLinkExternal3PStaticLibs(audio)
 if (MSVC)
     # Embree pulls in WinSock32
-    target_link_libraries(audiopluginresonanceaudio PUBLIC wsock32 ws2_32 PRIVATE pybind11::module)
+    target_link_libraries(audio PUBLIC wsock32 ws2_32 PRIVATE pybind11::module)
 else()
-    target_link_libraries(audiopluginresonanceaudio PRIVATE pybind11::module)
+    target_link_libraries(audio PRIVATE pybind11::module)
 endif ()
+
+set_target_properties(audio PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
+        SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
 set(IGIB_INSTALL_DIR "${INSTALL_DIR}/iGibson/")
 set(INSTALL_BIN_DIR "")
@@ -237,7 +247,7 @@ elseif (UNIX)
     set(INSTALL_BIN_DIR "x86_64")
 endif ()
 
-install(TARGETS audiopluginresonanceaudio
+install(TARGETS audio
         LIBRARY DESTINATION "${IGIB_INSTALL_DIR}/${INSTALL_BIN_DIR}/"
         ARCHIVE DESTINATION "${IGIB_INSTALL_DIR}/${INSTALL_BIN_DIR}/"
         RUNTIME DESTINATION "${IGIB_INSTALL_DIR}/${INSTALL_BIN_DIR}/")
