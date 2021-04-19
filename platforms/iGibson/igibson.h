@@ -146,13 +146,6 @@ void EXPORT_API SetListenerStereoSpeakerMode(bool enable_stereo_speaker_mode);
 void EXPORT_API SetRoomProperties(RoomProperties* room_properties,
                                   float* rt60s);
 
-// Starts the soundfield recorder.
-bool EXPORT_API StartSoundfieldRecorder();
-
-// Stops the soundfield recorder and writes the recorded data into file.
-bool EXPORT_API StopSoundfieldRecorderAndWriteToFile(const char* file_path,
-                                                     bool seamless);
-
 }  // extern C
 
 }

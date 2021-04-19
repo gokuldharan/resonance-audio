@@ -48,27 +48,6 @@ void ProcessListener(size_t num_frames, float* output) {
     std::fill(output, output + buffer_size_samples, 0.0f);
   }
 
-  if (resonance_audio_copy->is_recording_soundfield) {
-    // Record output into soundfield.
-    auto* const resonance_audio_api_impl =
-        static_cast<ResonanceAudioApiImpl*>(resonance_audio_copy->api.get());
-    const auto* soundfield_buffer =
-        resonance_audio_api_impl->GetAmbisonicOutputBuffer();
-    std::unique_ptr<AudioBuffer> record_buffer(
-        new AudioBuffer(kNumFirstOrderAmbisonicChannels, num_frames));
-    if (soundfield_buffer != nullptr) {
-      for (size_t ch = 0; ch < kNumFirstOrderAmbisonicChannels; ++ch) {
-        (*record_buffer)[ch] = (*soundfield_buffer)[ch];
-      }
-    } else {
-      // No output received, fill the record buffer with zeros.
-      record_buffer->Clear();
-    }
-    resonance_audio_copy->soundfield_recorder->AddInput(
-        std::move(record_buffer));
-  }
-}
-
 void SetListenerGain(float gain) {
   auto resonance_audio_copy = resonance_audio;
   if (resonance_audio_copy != nullptr) {
@@ -226,42 +205,6 @@ void SetRoomProperties(RoomProperties* room_properties, float* rt60s) {
                 rt60s, room_properties->reverb_brightness,
                 room_properties->reverb_time, room_properties->reverb_gain);
   resonance_audio_copy->api->SetReverbProperties(reverb_properties);
-}
-
-
-bool StartSoundfieldRecorder() {
-  auto resonance_audio_copy = resonance_audio;
-  if (resonance_audio_copy == nullptr) {
-    return false;
-  }
-  if (resonance_audio_copy->is_recording_soundfield) {
-    LOG(ERROR) << "Another soundfield recording already in progress";
-    return false;
-  }
-
-  resonance_audio_copy->is_recording_soundfield = true;
-  return true;
-}
-
-bool StopSoundfieldRecorderAndWriteToFile(const char* file_path,
-                                          bool seamless) {
-  auto resonance_audio_copy = resonance_audio;
-  if (resonance_audio_copy == nullptr) {
-    return false;
-  }
-  if (!resonance_audio_copy->is_recording_soundfield) {
-    LOG(ERROR) << "No recorded soundfield found";
-    return false;
-  }
-
-  resonance_audio_copy->is_recording_soundfield = false;
-  if (file_path == nullptr) {
-    resonance_audio_copy->soundfield_recorder->Reset();
-    return false;
-  }
-  resonance_audio_copy->soundfield_recorder->WriteToFile(
-      file_path, kRecordQuality, seamless);
-  return true;
 }
 
 }
