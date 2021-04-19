@@ -34,6 +34,8 @@ namespace igibson {
         py::array_t<int> material_indices,
         float scattering_coefficient, const char * fName, py::array_t<float> source_location, py::array_t<float> head_pos) {
 
+        std::cout << "Hello" << std::endl;
+
         // Number of frames per buffer.
         const size_t kFramesPerBuffer = 256;
 
