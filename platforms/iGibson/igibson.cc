@@ -1,5 +1,5 @@
 
-#include "platforms/igibson/igibson.h"
+#include "platforms/iGibson/igibson.h"
 
 #include <algorithm>
 #include <memory>
