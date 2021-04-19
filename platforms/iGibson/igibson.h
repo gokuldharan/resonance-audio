@@ -22,8 +22,6 @@ limitations under the License.
 #include "base/audio_buffer.h"
 #include "base/constants_and_types.h"
 
-#include "utils/ogg_vorbis_recorder.h"
-
 
 namespace vraudio {
 namespace igibson {
@@ -54,9 +52,6 @@ struct ResonanceAudioSystem {
         : api(CreateResonanceAudioApi(num_channels, frames_per_buffer,
             sample_rate)) {
         is_recording_soundfield = false;
-        soundfield_recorder.reset(
-            new OggVorbisRecorder(sample_rate, kNumFirstOrderAmbisonicChannels,
-                frames_per_buffer, kMaxNumRecordBuffers));
     }
 
     // ResonanceAudio API instance to communicate with the internal system.
@@ -68,9 +63,6 @@ struct ResonanceAudioSystem {
 
     // Denotes whether the soundfield recording is currently in progress.
     bool is_recording_soundfield;
-
-    // First-order ambisonic soundfield recorder.
-    std::unique_ptr<OggVorbisRecorder> soundfield_recorder;
 };
 
 
