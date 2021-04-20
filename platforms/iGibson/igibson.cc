@@ -47,7 +47,7 @@ void ProcessListener(size_t num_frames, float* output) {
 
     std::fill(output, output + buffer_size_samples, 0.0f);
   }
-
+}
 void SetListenerGain(float gain) {
   auto resonance_audio_copy = resonance_audio;
   if (resonance_audio_copy != nullptr) {

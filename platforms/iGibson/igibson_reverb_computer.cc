@@ -145,6 +145,13 @@ void InitializeSourceAndListeners(
 
 }  // namespace
 
+
+//Workaround to avoid embree mutex issue when not explicitly deleting this before returning
+void DeleteSceneManager(){
+  scene_manager->~SceneManager();
+}
+
+
 void InitializeReverbComputer(int num_vertices, int num_triangles,
                               float* vertices, int* triangles,
                               int* material_indices,

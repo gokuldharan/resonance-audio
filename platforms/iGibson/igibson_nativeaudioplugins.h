@@ -30,7 +30,7 @@ typedef uint64 UInt64;
 #endif
 
 #include "NativeCode/AudioPluginInterface.h"
-#include "platforms/igibson/igibson.h"
+#include "platforms/iGibson/igibson.h"
 
 
 namespace vraudio {

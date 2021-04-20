@@ -153,10 +153,10 @@ set(RA_OGG_RECORDER_SOURCES
         ${RA_SOURCE_DIR}/utils/vorbis_stream_encoder.cc
         ${RA_SOURCE_DIR}/utils/vorbis_stream_encoder.h
         )
-add_library(OggRecorderObj OBJECT ${RA_OGG_RECORDER_SOURCES})
-target_include_directories(OggRecorderObj PRIVATE ${RA_SOURCE_DIR})
-target_include_directories(OggRecorderObj PRIVATE ${LIBVORBIS_INCLUDE_DIR})
-target_include_directories(OggRecorderObj PRIVATE ${LIBOGG_INCLUDE_DIR})
+#add_library(OggRecorderObj OBJECT ${RA_OGG_RECORDER_SOURCES})
+#target_include_directories(OggRecorderObj PRIVATE ${RA_SOURCE_DIR})
+#target_include_directories(OggRecorderObj PRIVATE ${LIBVORBIS_INCLUDE_DIR})
+#target_include_directories(OggRecorderObj PRIVATE ${LIBOGG_INCLUDE_DIR})
 
 set(UNITY_PLUGIN_SDK_DIR "${PROJECT_SOURCE_DIR}/third_party/nativeaudioplugins" CACHE PATH "Path to Unity Native Audio Plugins SDK")
 
@@ -179,15 +179,14 @@ else ()
             $<TARGET_OBJECTS:SadieHrtfsObj>
             $<TARGET_OBJECTS:PffftObj>
             $<TARGET_OBJECTS:GeometricalAcousticsObj>
-            $<TARGET_OBJECTS:OggRecorderObj>
-            ${RA_GIB_SOURCE_DIR}/bindings.h
-            ${RA_GIB_SOURCE_DIR}/bindings.cc
             ${RA_GIB_SOURCE_DIR}/igibson_nativeaudioplugins.h
             ${RA_GIB_SOURCE_DIR}/igibson_nativeaudioplugins.cc
             ${RA_GIB_SOURCE_DIR}/igibson_reverb_computer.h
             ${RA_GIB_SOURCE_DIR}/igibson_reverb_computer.cc
             ${RA_GIB_SOURCE_DIR}/igibson.h
             ${RA_GIB_SOURCE_DIR}/igibson.cc
+            ${RA_GIB_SOURCE_DIR}/bindings.h
+            ${RA_GIB_SOURCE_DIR}/bindings.cc
             )
 endif ()
 

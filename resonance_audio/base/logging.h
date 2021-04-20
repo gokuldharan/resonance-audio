@@ -82,6 +82,22 @@ class FatalLogger {
   std::ostringstream error_string_;
 };
 
+// This class is used to log to std::cout.
+class Logger {
+ public:
+  Logger(const char* file, int line) {
+    error_string_ << file << ":" << line << ": ";
+  }
+  ~Logger() {
+    const std::string error_string = error_string_.str();
+    std::cout << error_string << std::endl;
+  }
+  std::ostream& GetStream() { return error_string_; }
+
+ private:
+  std::ostringstream error_string_;
+};
+
 #define CHECK(condition)                                     \
   !(condition) ? FatalLogger(__FILE__, __LINE__).GetStream() \
                : NullLogger().GetStream()
@@ -103,6 +119,6 @@ T CheckNotNull(T&& t) {
 }
 #define CHECK_NOTNULL(val) CheckNotNull(val)
 
-#define LOG(severity) NullLogger().GetStream()
+#define LOG(severity) Logger(__FILE__, __LINE__).GetStream()
 
 #endif  // RESONANCE_AUDIO_PLATFORM_LOGGING_H_

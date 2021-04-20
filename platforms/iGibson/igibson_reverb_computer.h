@@ -23,7 +23,14 @@ limitations under the License.
 namespace vraudio {
 namespace igibson {
 
+
+
+
+
 extern "C" {
+
+//Workaround to avoid embree mutex issue when not explicitly deleting this before returning
+void EXPORT_API DeleteSceneManager();
 
 // Initializes the scene and necessary data for ray tracing. The input vertices
 // are represented as an array of floating points, with three floats per vertex
