@@ -81,6 +81,8 @@ void Shutdown();
 // This method must be called from the audio thread.
 void ProcessListener(size_t num_frames, float* output);
 
+void ProcessListener(size_t num_frames, int16* output);
+
 // Updates the listener's position and rotation.
 void SetListenerTransform(float px, float py, float pz, float qx, float qy,
                           float qz, float qw);
@@ -99,6 +101,9 @@ void DestroySource(ResonanceAudioApi::SourceId id);
 // called from the audio thread.
 void ProcessSource(ResonanceAudioApi::SourceId id, size_t num_channels,
                    size_t num_frames, float* input);
+
+void ProcessSource(ResonanceAudioApi::SourceId id, size_t num_channels,
+                   size_t num_frames, const int16* input);
 
 // Updates the directivity parameters of the source.
 void SetSourceDirectivity(ResonanceAudioApi::SourceId id, float alpha,

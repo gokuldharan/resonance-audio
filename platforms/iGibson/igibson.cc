@@ -48,6 +48,26 @@ void ProcessListener(size_t num_frames, float* output) {
     std::fill(output, output + buffer_size_samples, 0.0f);
   }
 }
+
+void ProcessListener(size_t num_frames, int16* output) {
+  CHECK(output != nullptr);
+
+  auto resonance_audio_copy = resonance_audio;
+  if (resonance_audio_copy == nullptr) {
+    return;
+  }
+
+  if (!resonance_audio_copy->api->FillInterleavedOutputBuffer(
+          kNumOutputChannels, num_frames, output)) {
+    // No valid output was rendered, fill the output buffer with zeros.
+    const size_t buffer_size_samples = kNumOutputChannels * num_frames;
+    CHECK(!vraudio::DoesIntegerMultiplicationOverflow<size_t>(
+        kNumOutputChannels, num_frames, buffer_size_samples));
+
+    std::fill(output, output + buffer_size_samples, 0);
+  }
+}
+
 void SetListenerGain(float gain) {
   auto resonance_audio_copy = resonance_audio;
   if (resonance_audio_copy != nullptr) {
@@ -99,6 +119,17 @@ void DestroySource(ResonanceAudioApi::SourceId id) {
 
 void ProcessSource(ResonanceAudioApi::SourceId id, size_t num_channels,
                    size_t num_frames, float* input) {
+  CHECK(input != nullptr);
+
+  auto resonance_audio_copy = resonance_audio;
+  if (resonance_audio_copy != nullptr) {
+    resonance_audio_copy->api->SetInterleavedBuffer(id, input, num_channels,
+                                                    num_frames);
+  }
+}
+
+void ProcessSource(ResonanceAudioApi::SourceId id, size_t num_channels,
+                   size_t num_frames, const int16* input) {
   CHECK(input != nullptr);
 
   auto resonance_audio_copy = resonance_audio;

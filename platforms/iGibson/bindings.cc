@@ -121,7 +121,8 @@ namespace igibson {
 
         py::print("Creating source");
         time1 = std::chrono::high_resolution_clock::now();
-        int source_id = resonance_audio->api->CreateSoundObjectSource(RenderingMode::kBinauralHighQuality);
+        //int source_id = resonance_audio->api->CreateSoundObjectSource(RenderingMode::kBinauralHighQuality);
+        ResonanceAudioApi::SourceId source_id = CreateSoundObject(RenderingMode::kBinauralHighQuality);
 
         py::print("Set source position");
         resonance_audio->api->SetSourcePosition(source_id, source_location_arr[0], source_location_arr[1], source_location_arr[2]);
@@ -134,6 +135,8 @@ namespace igibson {
         resonance_audio->api->SetHeadPosition(head_pos_arr[0], head_pos_arr[1], head_pos_arr[2]);
         time2 = std::chrono::high_resolution_clock::now();
 
+        SetListenerStereoSpeakerMode(true);
+
         fp_ms = time2 - time1;
         py::print("Source and Head initialization in ", fp_ms.count(), "ms");
 
@@ -142,7 +145,14 @@ namespace igibson {
         time1 = std::chrono::high_resolution_clock::now();
         
         // Process the next buffer.
-        resonance_audio->api->SetInterleavedBuffer(source_id, &(wav->interleaved_samples()[0]), 1, num_frames);
+        ProcessSource(source_id, 1, kFramesPerBuffer, &(wav->interleaved_samples()[0]));
+        //resonance_audio->api->SetInterleavedBuffer(source_id, &(wav->interleaved_samples()[0]), 1, kFramesPerBuffer);
+
+        int sum = 0;
+        for (auto n : wav->interleaved_samples()) {
+            sum += n;
+        }
+        std::cout << "Sum of source buffer " << sum << std::endl;
         time2 = std::chrono::high_resolution_clock::now();
 
         fp_ms = time2 - time1;
@@ -151,19 +161,25 @@ namespace igibson {
         time1 = std::chrono::high_resolution_clock::now();
         py::array_t<int16> output_py = py::array_t<int16>(kNumOutputChannels * kFramesPerBuffer);
         py::buffer_info out_buf = output_py.request();
-        int16* output = (int16*)out_buf.ptr;
+        int16* output = static_cast<int16*>(out_buf.ptr);
 
-        
+        std::cout << out_buf.size << std::endl;
+        std::cout << ((sizeof output) / (sizeof output[0])) << std::endl;
+        std::cout << output << std::endl;
+
+        ProcessListener(kFramesPerBuffer, output);
+        /*
         if (!resonance_audio->api->FillInterleavedOutputBuffer(
-            2, num_frames, output)) {
+            2, kFramesPerBuffer, output)) {
+            std::cout << "Filling zeros" << std::endl;
             // No valid output was rendered, fill the output buffer with zeros.
             assert(1);
-            const size_t buffer_size_samples = 2 * num_frames;
+            const size_t buffer_size_samples = 2 * kFramesPerBuffer;
             CHECK(!vraudio::DoesIntegerMultiplicationOverflow<size_t>(
-                2, num_frames, buffer_size_samples));
+                2, kFramesPerBuffer, buffer_size_samples));
 
             std::fill(output, output + buffer_size_samples, 0);
-        }
+        }*/
         time2 = std::chrono::high_resolution_clock::now();
 
         fp_ms = time2 - time1;
@@ -173,12 +189,19 @@ namespace igibson {
         //DeleteSceneManager();
 
         py::print("Returning");
+
+        int sum1 = 0;
+        for (int i = 0; i < out_buf.size; ++i) {
+            sum1 += output[i];
+        }
+        std::cout << "Sum of output buffer " << sum1 << std::endl;
+
         return output_py; 
     }
 
     PYBIND11_MODULE(audio, m) {
         //m.def<decltype(&InitializeFromMeshAndTest)>("InitializeFromMeshAndTest", &InitializeFromMeshAndTest);
-        m.def("InitializeFromMeshAndTest", &InitializeFromMeshAndTest, py::return_value_policy::take_ownership, py::call_guard<py::scoped_ostream_redirect,
+        m.def("InitializeFromMeshAndTest", &InitializeFromMeshAndTest, py::return_value_policy::automatic, py::call_guard<py::scoped_ostream_redirect,
                      py::scoped_estream_redirect>());
     }
 }
